@@ -1,138 +1,488 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-Hans">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跑站游戏即时计分</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>RUN SCORE｜跑站积分榜</title>
 
     <style>
-        body {
-            font-family: Arial, "Microsoft JhengHei", sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
+
+        * {
+            box-sizing: border-box;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 28px;
+        body {
+            margin: 0;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                "Microsoft YaHei",
+                "Microsoft JhengHei",
+                Arial,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
         }
+
+
+        /* =========================
+           顶部
+        ========================= */
+
+        .header {
+            background: #111827;
+            color: white;
+
+            padding: 24px 18px 22px;
+
+            text-align: center;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 100;
+        }
+
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+
+        .header-subtitle {
+            margin-top: 5px;
+
+            font-size: 14px;
+
+            opacity: 0.75;
+        }
+
+
+        /* =========================
+           排行榜
+        ========================= */
+
+        .ranking-section {
+
+            max-width: 700px;
+
+            margin: 18px auto 0;
+
+            padding: 0 14px;
+        }
+
+
+        .section-title {
+
+            font-size: 20px;
+
+            font-weight: 800;
+
+            margin-bottom: 12px;
+        }
+
+
+        .ranking {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+
+        .ranking-item {
+
+            background: white;
+
+            border-radius: 14px;
+
+            padding: 12px 16px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.06);
+        }
+
+
+        .rank-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+
+        .rank-number {
+
+            width: 32px;
+
+            font-size: 20px;
+
+            font-weight: 800;
+
+            text-align: center;
+        }
+
+
+        .rank-name {
+
+            font-size: 17px;
+
+            font-weight: 700;
+        }
+
+
+        .rank-score {
+
+            font-size: 20px;
+
+            font-weight: 800;
+        }
+
+
+        /* =========================
+           计分区域
+        ========================= */
+
+        .teams-section {
+
+            max-width: 700px;
+
+            margin: 25px auto 40px;
+
+            padding: 0 14px;
+        }
+
+
+        .teams {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 16px;
+        }
+
+
+        /* =========================
+           组别卡片
+        ========================= */
 
         .team-card {
+
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+
+            border-radius: 20px;
+
+            padding: 20px 16px;
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.08);
+
             text-align: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+            transition: transform 0.15s;
         }
+
+
+        .team-card:active {
+
+            transform: scale(0.99);
+        }
+
 
         .team-name {
-            font-size: 24px;
-            font-weight: bold;
+
+            font-size: 22px;
+
+            font-weight: 800;
+
+            margin-bottom: 4px;
         }
+
 
         .score {
-            font-size: 35px;
-            margin: 15px;
-            color: #333;
+
+            font-size: 42px;
+
+            font-weight: 900;
+
+            margin: 8px 0 18px;
+
+            line-height: 1;
         }
+
+
+        /* =========================
+           按钮
+        ========================= */
+
+        .buttons {
+
+            display: flex;
+
+            gap: 12px;
+        }
+
 
         button {
-            width: 45%;
-            height: 70px;
-            font-size: 25px;
-            border-radius: 15px;
+
+            flex: 1;
+
+            height: 76px;
+
             border: none;
-            margin: 5px;
+
+            border-radius: 16px;
+
+            font-size: 30px;
+
+            font-weight: 900;
+
+            color: white;
+
             cursor: pointer;
+
+            -webkit-tap-highlight-color: transparent;
+
+            touch-action: manipulation;
         }
+
 
         .plus {
-            background: #4CAF50;
-            color: white;
+
+            background: #16a34a;
         }
 
+
         .minus {
-            background: #f44336;
-            color: white;
+
+            background: #dc2626;
+        }
+
+
+        button:active {
+
+            transform: scale(0.96);
+
+            opacity: 0.85;
+        }
+
+
+        /* =========================
+           页脚
+        ========================= */
+
+        .footer {
+
+            text-align: center;
+
+            padding: 0 20px 30px;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           桌面版
+        ========================= */
+
+        @media (min-width: 700px) {
+
+            .teams {
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
         }
 
     </style>
+
 </head>
 
 
 <body>
 
-<h1>🏃 跑站游戏即时计分</h1>
 
+<!-- =========================
+     顶部标题
+========================= -->
 
-<div class="team-card">
+<header class="header">
 
-    <div class="team-name">
-        第一组
+    <div class="header-title">
+        🏃 RUN SCORE
     </div>
 
-    <div class="score">
-        0 分
+    <div class="header-subtitle">
+        跑站游戏 · 即时积分榜
     </div>
 
-    <button class="plus">
-        +5
-    </button>
+</header>
 
-    <button class="minus">
-        -5
-    </button>
+
+
+<!-- =========================
+     排行榜
+========================= -->
+
+<section class="ranking-section">
+
+    <div class="section-title">
+        🏆 即时排行榜
+    </div>
+
+    <div id="ranking" class="ranking">
+
+        <!-- JavaScript 自动产生排行榜 -->
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================
+     各组计分
+========================= -->
+
+<section class="teams-section">
+
+    <div class="section-title">
+        📱 各组计分
+    </div>
+
+
+    <div id="teams" class="teams">
+
+
+        <!-- 第一组 -->
+
+        <div class="team-card"
+             data-team="1">
+
+            <div class="team-name">
+                第一组
+            </div>
+
+            <div class="score">
+                0 分
+            </div>
+
+            <div class="buttons">
+
+                <button class="plus">
+                    +5
+                </button>
+
+                <button class="minus">
+                    −5
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 第二组 -->
+
+        <div class="team-card"
+             data-team="2">
+
+            <div class="team-name">
+                第二组
+            </div>
+
+            <div class="score">
+                0 分
+            </div>
+
+            <div class="buttons">
+
+                <button class="plus">
+                    +5
+                </button>
+
+                <button class="minus">
+                    −5
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- 第三组 -->
+
+        <div class="team-card"
+             data-team="3">
+
+            <div class="team-name">
+                第三组
+            </div>
+
+            <div class="score">
+                0 分
+            </div>
+
+            <div class="buttons">
+
+                <button class="plus">
+                    +5
+                </button>
+
+                <button class="minus">
+                    −5
+                </button>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<div class="footer">
+
+    RUN SCORE · 即时计分系统
 
 </div>
 
 
 
-<div class="team-card">
-
-    <div class="team-name">
-        第二组
-    </div>
-
-    <div class="score">
-        0 分
-    </div>
-
-    <button class="plus">
-        +5
-    </button>
-
-    <button class="minus">
-        -5
-    </button>
-
-</div>
-
-
-
-<div class="team-card">
-
-    <div class="team-name">
-        第三组
-    </div>
-
-    <div class="score">
-        0 分
-    </div>
-
-    <button class="plus">
-        +5
-    </button>
-
-    <button class="minus">
-        -5
-    </button>
-
-</div>
-
+<!-- Firebase / JavaScript -->
 
 <script type="module" src="script.js?v=2"></script>
 
+
 </body>
+
 </html>
