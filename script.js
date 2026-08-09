@@ -15,7 +15,6 @@ import {
 // ==========================================
 
 const firebaseConfig = {
-
     apiKey: "AIzaSyCrhw9801HH1Od2nxceP7MNFHm4e6A6BZI",
     authDomain: "runscore-d0d68.firebaseapp.com",
     databaseURL: "https://runscore-d0d68-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -23,7 +22,6 @@ const firebaseConfig = {
     storageBucket: "runscore-d0d68.firebasestorage.app",
     messagingSenderId: "782511712945",
     appId: "1:782511712945:web:bd3d0bce0ae37328145090"
-
 };
 
 
