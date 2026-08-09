@@ -15,6 +15,7 @@ import {
 // ==========================================
 
 const firebaseConfig = {
+
     apiKey: "AIzaSyCrhw9801HH1Od2nxceP7MNFHm4e6A6BZI",
     authDomain: "runscore-d0d68.firebaseapp.com",
     databaseURL: "https://runscore-d0d68-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -22,12 +23,12 @@ const firebaseConfig = {
     storageBucket: "runscore-d0d68.firebasestorage.app",
     messagingSenderId: "782511712945",
     appId: "1:782511712945:web:bd3d0bce0ae37328145090"
+
 };
 
 
-
 // ==========================================
-// 启动 Firebase
+// 初始化 Firebase
 // ==========================================
 
 const app = initializeApp(firebaseConfig);
@@ -36,21 +37,25 @@ const database = getDatabase(app);
 
 
 // ==========================================
-// Firebase 分数位置
+// Firebase 位置
 // ==========================================
 
-const scoresRef = ref(database, "scores");
+const settingsRef =
+    ref(database, "settings/teamCount");
 
-
-// ==========================================
-// 找到网页上的组别
-// ==========================================
-
-const teams = document.querySelectorAll(".team-card");
+const scoresRef =
+    ref(database, "scores");
 
 
 // ==========================================
-// 储存目前分数
+// 当前组数
+// ==========================================
+
+let teamCount = 0;
+
+
+// ==========================================
+// 当前分数
 // ==========================================
 
 let currentScores = {};
@@ -60,154 +65,308 @@ let currentScores = {};
 // 组别名称
 // ==========================================
 
-const teamNames = {};
+let teamNames = {};
 
-teams.forEach((team, index) => {
 
-    const teamNumber = index + 1;
+// ==========================================
+// 读取组数
+// ==========================================
 
-    const nameElement =
-        team.querySelector(".team-name");
+onValue(settingsRef, (snapshot) => {
 
-    teamNames[teamNumber] =
-        nameElement.textContent.trim();
+    const count =
+        Number(snapshot.val());
+
+    if (!count || count < 1) {
+
+        return;
+
+    }
+
+    teamCount = count;
+
+    createTeams();
 
 });
 
 
 // ==========================================
-// 即时读取 Firebase
+// 建立组别
 // ==========================================
 
-onValue(scoresRef, (snapshot) => {
+function createTeams() {
 
-    const data = snapshot.val() || {};
+    const teamsContainer =
+        document.getElementById("teams");
 
-    currentScores = {};
+    teamsContainer.innerHTML = "";
 
-    teams.forEach((team, index) => {
-
-        const teamNumber = index + 1;
-
-        const score =
-            Number(data["team" + teamNumber]) || 0;
-
-        currentScores[teamNumber] = score;
+    teamNames = {};
 
 
-        // 更新网页上的分数
+    for (let i = 1; i <= teamCount; i++) {
 
-        const scoreElement =
-            team.querySelector(".score");
+        const teamCard =
+            document.createElement("div");
 
-        scoreElement.textContent =
-            score + " 分";
+        teamCard.className =
+            "team-card";
 
-    });
+        teamCard.dataset.team = i;
 
 
-    // 更新排行榜
+        const teamName =
+            `第${numberToChinese(i)}组`;
+
+
+        teamNames[i] =
+            teamName;
+
+
+        teamCard.innerHTML = `
+
+            <div class="team-name">
+
+                ${teamName}
+
+            </div>
+
+
+            <div class="score">
+
+                0 分
+
+            </div>
+
+
+            <div class="buttons">
+
+                <button class="plus">
+
+                    +5
+
+                </button>
+
+
+                <button class="minus">
+
+                    −5
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        teamsContainer.appendChild(teamCard);
+
+    }
+
+
+    attachButtons();
+
+    loadScores();
 
     updateRanking();
 
-});
+}
 
 
 // ==========================================
-// 初始化 Firebase 分数
+// 中文数字
 // ==========================================
 
-teams.forEach((team, index) => {
+function numberToChinese(number) {
 
-    const teamNumber = index + 1;
+    const chineseNumbers = [
 
-    const teamRef =
-        ref(database, "scores/team" + teamNumber);
+        "零",
+        "一",
+        "二",
+        "三",
+        "四",
+        "五",
+        "六",
+        "七",
+        "八",
+        "九",
+        "十",
+        "十一",
+        "十二",
+        "十三",
+        "十四",
+        "十五",
+        "十六",
+        "十七",
+        "十八",
+        "十九",
+        "二十"
+
+    ];
 
 
-    runTransaction(teamRef, (currentScore) => {
+    if (number <= 20) {
 
-        if (currentScore === null) {
+        return chineseNumbers[number];
 
-            return 0;
+    }
+
+
+    return number;
+
+}
+
+
+// ==========================================
+// 读取分数
+// ==========================================
+
+function loadScores() {
+
+    onValue(scoresRef, (snapshot) => {
+
+        const data =
+            snapshot.val() || {};
+
+
+        currentScores = {};
+
+
+        for (let i = 1; i <= teamCount; i++) {
+
+            const score =
+                Number(data["team" + i]) || 0;
+
+
+            currentScores[i] =
+                score;
+
+
+            const teamCard =
+                document.querySelector(
+                    `.team-card[data-team="${i}"]`
+                );
+
+
+            if (teamCard) {
+
+                const scoreElement =
+                    teamCard.querySelector(".score");
+
+
+                scoreElement.textContent =
+                    score + " 分";
+
+            }
 
         }
 
-        return currentScore;
+
+        updateRanking();
 
     });
 
-});
+}
 
 
 // ==========================================
-// +5 / -5
+// 建立 +5 / -5 按钮功能
 // ==========================================
 
-teams.forEach((team, index) => {
+function attachButtons() {
 
-    const teamNumber = index + 1;
-
-    const teamRef =
-        ref(database, "scores/team" + teamNumber);
+    const teams =
+        document.querySelectorAll(".team-card");
 
 
-    // -------------------------
-    // +5
-    // -------------------------
+    teams.forEach((team) => {
 
-    const plusButton =
-        team.querySelector(".plus");
+        const teamNumber =
+            Number(team.dataset.team);
 
-    plusButton.addEventListener("click", () => {
 
-        plusButton.disabled = true;
+        const teamRef =
+            ref(
+                database,
+                "scores/team" + teamNumber
+            );
 
-        runTransaction(teamRef, (currentScore) => {
 
-            return (Number(currentScore) || 0) + 5;
+        // +5
 
-        }).finally(() => {
+        const plusButton =
+            team.querySelector(".plus");
 
-            setTimeout(() => {
 
-                plusButton.disabled = false;
+        plusButton.addEventListener(
+            "click",
+            () => {
 
-            }, 300);
+                plusButton.disabled = true;
 
-        });
+
+                runTransaction(
+                    teamRef,
+                    (currentScore) => {
+
+                        return (
+                            Number(currentScore) || 0
+                        ) + 5;
+
+                    }
+                ).finally(() => {
+
+                    setTimeout(() => {
+
+                        plusButton.disabled = false;
+
+                    }, 300);
+
+                });
+
+            }
+        );
+
+
+        // -5
+
+        const minusButton =
+            team.querySelector(".minus");
+
+
+        minusButton.addEventListener(
+            "click",
+            () => {
+
+                minusButton.disabled = true;
+
+
+                runTransaction(
+                    teamRef,
+                    (currentScore) => {
+
+                        return (
+                            Number(currentScore) || 0
+                        ) - 5;
+
+                    }
+                ).finally(() => {
+
+                    setTimeout(() => {
+
+                        minusButton.disabled = false;
+
+                    }, 300);
+
+                });
+
+            }
+        );
 
     });
 
-
-    // -------------------------
-    // -5
-    // -------------------------
-
-    const minusButton =
-        team.querySelector(".minus");
-
-    minusButton.addEventListener("click", () => {
-
-        minusButton.disabled = true;
-
-        runTransaction(teamRef, (currentScore) => {
-
-            return (Number(currentScore) || 0) - 5;
-
-        }).finally(() => {
-
-            setTimeout(() => {
-
-                minusButton.disabled = false;
-
-            }, 300);
-
-        });
-
-    });
-
-});
+}
 
 
 // ==========================================
@@ -227,25 +386,24 @@ function updateRanking() {
     }
 
 
-    // 把所有组别整理成数组
-
     const rankingData =
-        Object.keys(currentScores).map((teamNumber) => {
+        Object.keys(currentScores)
+            .map((teamNumber) => {
 
-            return {
+                return {
 
-                teamNumber:
-                    Number(teamNumber),
+                    teamNumber:
+                        Number(teamNumber),
 
-                name:
-                    teamNames[teamNumber],
+                    name:
+                        teamNames[teamNumber],
 
-                score:
-                    currentScores[teamNumber]
+                    score:
+                        currentScores[teamNumber]
 
-            };
+                };
 
-        });
+            });
 
 
     // 分数由高到低
@@ -257,12 +415,8 @@ function updateRanking() {
     });
 
 
-    // 清空旧排行榜
-
     rankingElement.innerHTML = "";
 
-
-    // 建立新的排行榜
 
     rankingData.forEach((team, index) => {
 
@@ -272,8 +426,6 @@ function updateRanking() {
         item.className =
             "ranking-item";
 
-
-        // 名次
 
         let rankText =
             (index + 1) + "位";
@@ -307,6 +459,7 @@ function updateRanking() {
                     ${rankText}
 
                 </div>
+
 
                 <div class="rank-name">
 
