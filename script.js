@@ -136,23 +136,34 @@ function createTeams() {
 
             </div>
 
-
             <div class="buttons">
 
-                <button class="plus">
+<button class="plus" data-change="5">
++5
+</button>
 
-                    +5
+<button class="plus" data-change="3">
++3
+</button>
 
-                </button>
+<button class="plus" data-change="1">
++1
+</button>
+
+<button class="minus" data-change="-5">
+-5
+</button>
+
+<button class="minus" data-change="-10">
+-10
+</button>
+
+</div>
 
 
-                <button class="minus">
+</div>
 
-                    −5
-
-                </button>
-
-            </div>
+          
 
         `;
 
@@ -274,95 +285,49 @@ function loadScores() {
 
 function attachButtons() {
 
-    const teams =
-        document.querySelectorAll(".team-card");
+  const teams = document.querySelectorAll(".team-card");
 
+  teams.forEach((team) => {
 
-    teams.forEach((team) => {
+    const teamNumber = Number(team.dataset.team);
 
-        const teamNumber =
-            Number(team.dataset.team);
+    const teamRef = ref(
+      database,
+      "scores/team" + teamNumber
+    );
 
+    const buttons = team.querySelectorAll("button[data-change]");
 
-        const teamRef =
-            ref(
-                database,
-                "scores/team" + teamNumber
-            );
+    buttons.forEach((button) => {
 
+      const change = Number(button.dataset.change);
 
-        // +5
+      button.addEventListener("click", () => {
 
-        const plusButton =
-            team.querySelector(".plus");
+        button.disabled = true;
 
+        runTransaction(
+          teamRef,
+          (currentScore) => {
 
-        plusButton.addEventListener(
-            "click",
-            () => {
+            return (
+              Number(currentScore) || 0
+            ) + change;
 
-                plusButton.disabled = true;
+          }
+        ).finally(() => {
 
+          setTimeout(() => {
+            button.disabled = false;
+          }, 300);
 
-                runTransaction(
-                    teamRef,
-                    (currentScore) => {
+        });
 
-                        return (
-                            Number(currentScore) || 0
-                        ) + 5;
-
-                    }
-                ).finally(() => {
-
-                    setTimeout(() => {
-
-                        plusButton.disabled = false;
-
-                    }, 300);
-
-                });
-
-            }
-        );
-
-
-        // -5
-
-        const minusButton =
-            team.querySelector(".minus");
-
-
-        minusButton.addEventListener(
-            "click",
-            () => {
-
-                minusButton.disabled = true;
-
-
-                runTransaction(
-                    teamRef,
-                    (currentScore) => {
-
-                        return (
-                            Number(currentScore) || 0
-                        ) - 5;
-
-                    }
-                ).finally(() => {
-
-                    setTimeout(() => {
-
-                        minusButton.disabled = false;
-
-                    }, 300);
-
-                });
-
-            }
-        );
+      });
 
     });
+
+  });
 
 }
 
