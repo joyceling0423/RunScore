@@ -72,13 +72,12 @@ let teamNames = {};
 
 onValue(settingsRef, (snapshot) => {
 
-    const count =
-        Number(snapshot.val());
+    const count = Number(snapshot.val());
 
-    if (!count || count < 1) {
+    console.log("Firebase teamCount =", count);
 
+    if (!Number.isInteger(count) || count < 1) {
         return;
-
     }
 
     teamCount = count;
